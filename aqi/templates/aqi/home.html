@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Air Pollution AQI | AIR Tracker</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f4f8; text-align: center; color: #333; margin: 0; padding: 20px; }
+        .box { background: white; padding: 40px; display: inline-block; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
+        
+        h2 { color: #1a2a6c; margin-bottom: 25px; }
+        
+        form { display: flex; gap: 10px; margin-bottom: 20px; }
+        input { padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; flex-grow: 1; font-size: 16px; outline: none; transition: border-color 0.3s; }
+        input:focus { border-color: #1976d2; }
+        button { padding: 12px 20px; background: #1976d2; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: background 0.3s; }
+        button:hover { background: #1565c0; }
+
+        .aqi-card { margin: 25px 0; padding: 20px; border-radius: 15px; background: #fff; border: 1px solid #eee; }
+        #aqi-value { font-size: 64px; margin: 10px 0; color: #2c3e50; }
+        
+        /* Slugify-friendly Color Classes (All Lowercase) */
+        .level-good { color: #2ecc71; }      /* Green */
+        .level-fair { color: #f1c40f; }      /* Yellow */
+        .level-moderate { color: #e67e22; }  /* Orange */
+        .level-poor { color: #e74c3c; }      /* Red */
+        .level-very-poor { color: #8e44ad; } /* Purple */
+
+        .pollutant-info { display: flex; justify-content: space-around; background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+        .pollutant-info p { margin: 0; font-size: 14px; }
+        
+        .recommendation { padding: 15px; border-radius: 10px; font-size: 0.95em; line-height: 1.4; background: #e3f2fd; color: #0d47a1; border-left: 5px solid #1976d2; text-align: left; }
+
+        nav { margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px; }
+        nav a { margin: 0 15px; text-decoration: none; color: #1976d2; font-weight: 500; font-size: 14px; }
+        nav a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2>AQI AIR POLLUTION</h2>
+    
+    <form method="POST">
+        {% csrf_token %}
+        <input type="text" name="city" placeholder="Search City (e.g. London)" required>
+        <button type="submit">Check</button>
+    </form>
+
+    {% if error %}
+        <p style="color: #d32f2f; background: #ffebee; padding: 10px; border-radius: 5px;">{{ error }}</p>
+    {% endif %}
+
+    {% if aqi %}
+        <div class="aqi-card">
+            <h3 style="margin: 0; color: #555;">{{ city|title }}</h3>
+            <h1 id="aqi-value">{{ aqi }}</h1>
+            <h3 class="level-{{ level|slugify }}">Condition: {{ level }}</h3>
+        </div>
+
+        <div class="pollutant-info">
+            <div>
+                <p>PM2.5</p>
+                <strong>{{ pm2_5 }} <small>µg/m³</small></strong>
+            </div>
+            <div>
+                <p>NO₂</p>
+                <strong>{{ no2 }} <small>µg/m³</small></strong>
+            </div>
+        </div>
+
+        <div class="recommendation">
+            <strong>Health Tip:</strong>
+            {% if aqi == 1 %}
+                Enjoy your outdoor activities! The air is fresh.
+            {% elif aqi == 2 %}
+                Sensitive individuals should reduce long outdoor sessions.
+            {% elif aqi == 3 %}
+                Consider closing windows and reducing outdoor exercise.
+            {% else %}
+                Avoid outdoor activity. Wear a mask (N95) if you must go out.
+            {% endif %}
+        </div>
+    {% else %}
+        <div style="margin-top: 40px;">
+            
+            <p style="color: #999;">Enter a city name above to view real-time pollution data and health advice.</p>
+        </div>
+    {% endif %}
+
+    <nav>
+        <a href="{% url 'home' %}">AQI Home</a>
+        <a href="{% url 'weather' %}">Full Weather Details</a>
+    </nav>
+</div>
+
+</body>
+</html>
